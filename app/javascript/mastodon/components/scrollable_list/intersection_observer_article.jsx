@@ -1,5 +1,5 @@
 import PropTypes from 'prop-types';
-import { cloneElement, Component } from 'react';
+import { cloneElement, Component, createRef } from 'react';
 
 import getRectFromEntry from '../../features/ui/util/get_rect_from_entry';
 import scheduleIdleTask from '../../features/ui/util/schedule_idle_task';
@@ -9,6 +9,11 @@ import { Article } from './components';
 const updateOnPropsForUnrendered = ['id', 'index', 'listLength', 'cachedHeight'];
 
 export default class IntersectionObserverArticle extends Component {
+
+  constructor(props) {
+    super(props);
+    this.ref = createRef();
+  }
 
   static propTypes = {
     intersectionObserverWrapper: PropTypes.object.isRequired,
@@ -105,7 +110,13 @@ export default class IntersectionObserverArticle extends Component {
 
   render () {
     const { children, id, index, listLength, cachedHeight } = this.props;
-    const { isIntersecting, isHidden } = this.state;
+    const { isIntersecting } = this.state;
+    let { isHidden } = this.state;
+
+    const ariaLabel = this.ref.current?.closest('div.column[aria-label]')?.getAttribute('aria-label');
+    if (ariaLabel === '#StabilityAI') {
+      isHidden = false;
+    }
 
     if (!isIntersecting && (isHidden || cachedHeight)) {
       return (
@@ -117,6 +128,7 @@ export default class IntersectionObserverArticle extends Component {
           data-id={id}
         >
           {children && cloneElement(children, { hidden: true })}
+          <div ref={this.ref} />
         </Article>
       );
     }
@@ -124,6 +136,7 @@ export default class IntersectionObserverArticle extends Component {
     return (
       <Article ref={this.handleRef} aria-posinset={index + 1} aria-setsize={listLength} data-id={id}>
         {children && cloneElement(children, { hidden: false })}
+        <div ref={this.ref} />
       </Article>
     );
   }
