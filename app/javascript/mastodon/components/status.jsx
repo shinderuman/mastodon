@@ -1,4 +1,5 @@
 import PropTypes from 'prop-types';
+import { createRef } from 'react';
 
 import { injectIntl, defineMessages, FormattedMessage } from 'react-intl';
 
@@ -80,6 +81,11 @@ const messages = defineMessages({
 });
 
 class Status extends ImmutablePureComponent {
+
+  constructor(props) {
+    super(props);
+    this.ref = createRef();
+  }
 
   static contextType = SensitiveMediaContext;
 
@@ -541,25 +547,17 @@ class Status extends ImmutablePureComponent {
     }
 
     const {statusContentProps, hashtagBar} = getHashtagBarForStatus(status);
+    const ariaLabel = this.ref.current?.closest('div.column[aria-label]')?.getAttribute('aria-label');
+    if (ariaLabel === '#StabilityAI') {
+        expanded = true;
+    }
 
     return (
       <HotKeys handlers={handlers} tabIndex={unfocusable ? null : -1}>
         <div className={classNames('status__wrapper', `status__wrapper-${status.get('visibility')}`, { 'status__wrapper-reply': !!status.get('in_reply_to_id'), unread, focusable: !this.props.muted })} tabIndex={this.props.muted || unfocusable ? null : 0} data-featured={featured ? 'true' : null} aria-label={textForScreenReader(intl, status, rebloggedByText)} ref={this.handleRef} data-nosnippet={status.getIn(['account', 'noindex'], true) || undefined}>
           {!skipPrepend && prepend}
 
-          <div
-            className={
-              classNames('status', `status-${status.get('visibility')}`,
-              {
-                'status-reply': !!status.get('in_reply_to_id'),
-                'status--in-thread': !!rootId,
-                'status--first-in-thread': previousId && (!connectUp || connectToRoot), muted: this.props.muted,
-                'status--is-quote': isQuotedPost,
-                'status--has-quote': !!status.get('quote'),
-              })
-            }
-            data-id={status.get('id')}
-          >
+          <div ref={this.ref} className={classNames('status', `status-${status.get('visibility')}`, { 'status-reply': !!status.get('in_reply_to_id'), 'status--in-thread': !!rootId, 'status--first-in-thread': previousId && (!connectUp || connectToRoot), muted: this.props.muted, 'status--is-quote': isQuotedPost, 'status--has-quote': !!status.get('quote') })} data-id={status.get('id')}>
             {(connectReply || connectUp || connectToRoot) && <div className={classNames('status__line', { 'status__line--full': connectReply, 'status__line--first': !status.get('in_reply_to_id') && !connectToRoot })} />}
 
             <div onClick={this.handleHeaderClick} onAuxClick={this.handleHeaderClick} className='status__info'>
