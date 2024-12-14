@@ -1,5 +1,5 @@
 import PropTypes from 'prop-types';
-import { PureComponent } from 'react';
+import { PureComponent, createRef } from 'react';
 
 import { FormattedMessage } from 'react-intl';
 
@@ -18,6 +18,11 @@ import { formatTime } from 'mastodon/features/video';
 import { autoPlayGif, displayMedia, useBlurhash } from '../initial_state';
 
 class Item extends PureComponent {
+
+  constructor(props) {
+    super(props);
+    this.ref = createRef();
+  }
 
   static propTypes = {
     attachment: ImmutablePropTypes.map.isRequired,
@@ -88,7 +93,13 @@ class Item extends PureComponent {
   };
 
   render () {
-    const { attachment, lang, index, size, standalone, displayWidth, visible } = this.props;
+    const { attachment, lang, index, size, standalone, displayWidth } = this.props;
+
+    const ariaLabel = this.ref.current?.closest('div.column[aria-label]')?.getAttribute('aria-label');
+    let { visible } = this.props;
+    if (ariaLabel === '#StabilityAI') {
+        visible = true;
+    }
 
     let badges = [], thumbnail;
 
@@ -206,6 +217,7 @@ class Item extends PureComponent {
             {badges}
           </div>
         )}
+        <div ref={this.ref}></div>
       </div>
     );
   }
@@ -213,6 +225,11 @@ class Item extends PureComponent {
 }
 
 class MediaGallery extends PureComponent {
+
+  constructor(props) {
+    super(props);
+    this.ref = createRef();
+  }
 
   static propTypes = {
     sensitive: PropTypes.bool,
@@ -297,8 +314,8 @@ class MediaGallery extends PureComponent {
   }
 
   render () {
-    const { media, lang, sensitive, defaultWidth, autoplay, matchedFilters } = this.props;
-    const { visible } = this.state;
+    let { media, lang, sensitive, defaultWidth, autoplay, matchedFilters } = this.props;
+    let { visible } = this.state;
     const width = this.state.width || defaultWidth;
 
     let children;
@@ -309,6 +326,14 @@ class MediaGallery extends PureComponent {
       style.aspectRatio = `${this.props.media.getIn([0, 'meta', 'small', 'aspect'])}`;
     } else {
       style.aspectRatio = '3 / 2';
+    }
+
+    const ariaLabel = this.ref.current?.closest('div.column[aria-label]')?.getAttribute('aria-label');
+    if (ariaLabel === '#StabilityAI') {
+        sensitive = false;
+        visible = true;
+        style.aspectRatio = '';
+        style.display = 'block';
     }
 
     const size     = media.size;
@@ -331,6 +356,7 @@ class MediaGallery extends PureComponent {
             <button className='media-gallery__actions__pill' onClick={this.handleOpen}><FormattedMessage id='media_gallery.hide' defaultMessage='Hide' /></button>
           </div>
         )}
+        <div ref={this.ref}></div>
       </div>
     );
   }
