@@ -32,7 +32,7 @@ class Api::V1::Timelines::TagController < Api::V1::Timelines::BaseController
 
   def tag_timeline_statuses
     tag_feed.get(
-      limit_param(DEFAULT_STATUSES_LIMIT),
+      limit_param(DEFAULT_STATUSES_LIMIT, 160),
       params[:max_id],
       params[:since_id],
       params[:min_id]
