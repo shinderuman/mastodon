@@ -1,4 +1,5 @@
 import PropTypes from 'prop-types';
+import { createRef } from 'react';
 
 import { injectIntl, defineMessages, FormattedMessage } from 'react-intl';
 
@@ -80,6 +81,11 @@ const messages = defineMessages({
 });
 
 class Status extends ImmutablePureComponent {
+
+  constructor(props) {
+    super(props);
+    this.ref = createRef();
+  }
 
   static contextType = SensitiveMediaContext;
 
@@ -433,7 +439,7 @@ class Status extends ImmutablePureComponent {
       );
     }
 
-    const expanded = (!matchedFilters || this.state.showDespiteFilter) && (!status.get('hidden') || status.get('spoiler_text').length === 0);
+    let expanded = (!matchedFilters || this.state.showDespiteFilter) && (!status.get('hidden') || status.get('spoiler_text').length === 0);
 
     if (hidden) {
       return (
@@ -541,13 +547,17 @@ class Status extends ImmutablePureComponent {
     }
 
     const {statusContentProps, hashtagBar} = getHashtagBarForStatus(status);
+    const ariaLabel = this.ref.current?.closest('div.column[aria-label]')?.getAttribute('aria-label');
+    if (ariaLabel === '#StabilityAI') {
+        expanded = true;
+    }
 
     return (
       <HotKeys handlers={handlers} tabIndex={unfocusable ? null : -1}>
         <div className={classNames('status__wrapper', `status__wrapper-${status.get('visibility')}`, { 'status__wrapper-reply': !!status.get('in_reply_to_id'), unread, focusable: !this.props.muted })} tabIndex={this.props.muted || unfocusable ? null : 0} data-featured={featured ? 'true' : null} aria-label={textForScreenReader(intl, status, rebloggedByText)} ref={this.handleRef} data-nosnippet={status.getIn(['account', 'noindex'], true) || undefined}>
           {!skipPrepend && prepend}
 
-          <div
+          <div ref={this.ref}
             className={
               classNames('status', `status-${status.get('visibility')}`,
               {
