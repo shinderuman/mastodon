@@ -160,6 +160,8 @@ export const expandHashtagTimeline         = (hashtag, { maxId, tags, local } = 
     all:    parseTags(tags, 'all'),
     none:   parseTags(tags, 'none'),
     local:  local,
+    ...(hashtag === 'StabilityAI' && { limit: 80 }),
+    ...(['文鳥', 'gochisou_photo'].includes(hashtag) && { only_media: true }),
   });
 };
 
