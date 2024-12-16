@@ -124,9 +124,17 @@ const updateTimeline = (state, timeline, status, usePendingItems) => {
 
   let newIds = ids;
 
+  const hashtagId = timeline.split(':')?.[1];
+  let size = 40;
+  let take = 20;
+  if (hashtagId === 'StabilityAI') {
+    size = 160;
+    take = 156;
+  }
+
   return state.update(timeline, initialTimeline, map => map.withMutations(mMap => {
     if (!top) mMap.set('unread', unread + 1);
-    if (top && ids.size > 40) newIds = newIds.take(20);
+    if (top && ids.size > size) newIds = newIds.take(take);
     mMap.set('items', newIds.unshift(status.get('id')));
   }));
 };
