@@ -13,12 +13,13 @@ RSpec.describe 'Admin Dashboard' do
       sign_in(user)
     end
 
-    it 'returns page with system check messages' do
+    it 'shows system check messages except software update notices' do
       visit admin_dashboard_path
 
       expect(page)
         .to have_title(I18n.t('admin.dashboard.title'))
-        .and have_text(I18n.t('admin.system_checks.software_version_patch_check.message_html'))
+        .and have_text(I18n.t('admin.system_checks.rules_check.message_html'))
+        .and have_no_text(I18n.t('admin.system_checks.software_version_patch_check.message_html'))
         .and have_text('0 pending hashtags')
     end
 
@@ -27,6 +28,7 @@ RSpec.describe 'Admin Dashboard' do
     def stub_system_checks
       stub_const 'Admin::SystemCheck::ACTIVE_CHECKS', [
         Admin::SystemCheck::SoftwareVersionCheck,
+        Admin::SystemCheck::RulesCheck,
       ]
     end
   end
