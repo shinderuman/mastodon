@@ -4,9 +4,11 @@
 - content_for :heading_actions do
   = date_range(@time_period)
 
-- unless @system_checks.empty?
+- software_update_checks = %i(software_version_check software_version_patch_check software_version_critical_check)
+- system_checks = @system_checks.reject { |message| software_update_checks.include?(message.key) }
+- unless system_checks.empty?
   .flash-message-stack
-    = render collection: @system_checks, partial: 'admin/system_check/messages/message'
+    = render collection: system_checks, partial: 'admin/system_check/messages/message'
 
 .dashboard
   .dashboard__item

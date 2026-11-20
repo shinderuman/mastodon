@@ -9,15 +9,18 @@ RSpec.describe 'finding software updates through the admin interface' do
   let!(:other_release) { Fabricate(:software_update, version: '98.0.0', type: 'major', release_notes: '') }
   let!(:outdated_release) { Fabricate(:software_update, version: '3.5.0', type: 'major', urgent: true, release_notes: 'https://github.com/mastodon/mastodon/releases/v3.5.0') }
 
-  it 'shows a link to the software updates page, which links to release notes' do
+  it 'shows release notes on the software updates page without update notices' do
     visit settings_profile_path
-    click_on I18n.t('admin.critical_update_pending')
+    expect(page).to have_no_link(href: admin_software_updates_path)
+
+    visit admin_software_updates_path
 
     expect(page)
       .to have_title(I18n.t('admin.software_updates.title'))
       .and have_text(latest_release.version)
       .and have_text(other_release.version)
       .and have_no_text(outdated_release.version)
+      .and have_no_text(I18n.t('admin.software_updates.critical_update'))
 
     within("#software_update_#{latest_release.id}") do
       click_on I18n.t('admin.software_updates.release_notes')
